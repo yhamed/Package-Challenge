@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+// this utility class enables us to read files, adapt them to a more readable format and do a basic check for unstructured or corrupted files in that case ApiException will be thrown
 public class FileReaderUtils {
     private final static String COLON = ":";
     private final static String OPEN_PARENTHESIS = "(";
@@ -48,7 +48,7 @@ public class FileReaderUtils {
     // 8:1,15.3,€34
 
     // data lifecycle example:
-    // 81 :(1,53.38,€45) (2,88.6 2, €98)  => 81:(1,53.38,€45||2,88.62,€98) => 81:   1,53.38,€45|2,88.62,€98
+    // 81 :(1,53.38,€45) (2,88.6 2, €98)  => 81:(1,53.38,€45||2,88.62,€98) => 81:1,53.38,€45|2,88.62,€98
     public static List<String> transformFileData(List<String> rawFileData) throws ApiException {
         try {
             return transformFileData(rawFileData, new ArrayList<>(), new StringBuilder(), false);
@@ -106,12 +106,8 @@ public class FileReaderUtils {
         return !lineEntry.contains(COLON);
     }
 
-    private static void populateRefinedData(List<String> refinedData, String entry) throws ApiException{
-        refinedData.add(checkDataIntegrity(entry));
-    }
-
-    public static String checkDataIntegrity(String refinedData) throws ApiException {
-        if(refinedData.contains(OPEN_PARENTHESIS) || refinedData.contains(CLOSE_PARENTHESIS)) {
+    public static String checkDataStructure(String refinedData) throws ApiException {
+        if (refinedData.contains(OPEN_PARENTHESIS) || refinedData.contains(CLOSE_PARENTHESIS)) {
             throw new ApiException(ApiException.CORRUPTED_PACKAGE_DATA);
         }
         return refinedData;

@@ -5,16 +5,16 @@ import java.util.Objects;
 
 public class PackageEntry implements Serializable {
 
-   private static final long serialVersionUID = 5009062303345717018L;
+    private static final long serialVersionUID = -1154114435785633780L;
 
-   private long indexNumber;
-   private float weight;
-   private float cost;
+    private long indexNumber;
+    private float weight;
+    private float cost;
 
     public PackageEntry(PackageEntryBuilder packageEntryBuilder) {
-    this.indexNumber = packageEntryBuilder.indexNumber;
-    this.weight = packageEntryBuilder.weight;
-    this.cost = packageEntryBuilder.cost;
+        this.indexNumber = packageEntryBuilder.indexNumber;
+        this.weight = packageEntryBuilder.weight;
+        this.cost = packageEntryBuilder.cost;
     }
 
     public long getIndexNumber() {

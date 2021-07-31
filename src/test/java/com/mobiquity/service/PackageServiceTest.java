@@ -21,7 +21,7 @@ class PackageServiceTest {
         // setup
 
         // test
-       List<PackageEntry> packageEntryList = packageService.readPackages("testPath");
+        List<PackageEntry> packageEntryList = packageService.readPackages("testPath");
         // assert
         Assertions.assertThat(packageEntryList).isNull();
     }

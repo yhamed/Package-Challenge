@@ -1,13 +1,16 @@
 package com.mobiquity.utilities;
 
 import com.mobiquity.exception.ApiException;
+
 import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -77,14 +80,14 @@ class FileReaderUtilsTest {
 
 
     @Test
-    void checkDataIntegrity() {
+    void checkDataStructure() {
         // setup
         String packageData1 = "52:1,1.5,12|(";
         String packageData2 = "52:1,1.5,)12|";
 
         // test
         Exception exception = assertThrows(ApiException.class, () -> {
-            FileReaderUtils.checkDataIntegrity(packageData1);
+            FileReaderUtils.checkDataStructure(packageData1);
         });
 
         // assert
@@ -94,12 +97,12 @@ class FileReaderUtilsTest {
 
         // test
         Exception exception2 = assertThrows(ApiException.class, () -> {
-            FileReaderUtils.checkDataIntegrity(packageData2);
+            FileReaderUtils.checkDataStructure(packageData2);
         });
 
         // assert
         assertThat(exception).isNotNull();
         assertThat(exception.getClass()).isEqualTo(ApiException.class);
         assertThat(exception.getMessage()).isEqualTo(ApiException.CORRUPTED_PACKAGE_DATA);
-        }
     }
+}
