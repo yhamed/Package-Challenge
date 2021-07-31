@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface IPackageService {
     public List<Package> readPackages(String filePath) throws APIException;
-    public String pack(String filePath) throws APIException;
+    public List<Package> pack(List<Package> packageList);
 }

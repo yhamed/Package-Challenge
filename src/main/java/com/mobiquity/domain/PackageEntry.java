@@ -48,6 +48,16 @@ public class PackageEntry implements Serializable, Comparable<PackageEntry>{
 
     @Override
     public int compareTo(PackageEntry packageEntry) {
-        return Float.compare(this.getCostByWeightRatio(), packageEntry.getCostByWeightRatio());
+        int compareResult = Float.compare(this.getCostByWeightRatio(), packageEntry.getCostByWeightRatio());
+        return compareResult == 0 ? Float.compare(this.cost, packageEntry.getCost()): compareResult;
+    }
+
+    @Override
+    public String toString() {
+        return "PackageEntry{" +
+                "indexNumber=" + indexNumber +
+                ", weight=" + weight +
+                ", cost=" + cost +
+                '}';
     }
 }

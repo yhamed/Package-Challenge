@@ -1,7 +1,7 @@
 package com.mobiquity.domain;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public class Package implements Serializable {
@@ -9,7 +9,7 @@ public class Package implements Serializable {
     private static final long serialVersionUID = -3201010390319695890L;
 
     private float maxWeight;
-    private final Collection<PackageEntry> packageEntries;
+    private final List<PackageEntry> packageEntries;
 
     public Package(PackageBuilder packageBuilder) {
         this.maxWeight = packageBuilder.maxWeight;
@@ -20,7 +20,7 @@ public class Package implements Serializable {
         return maxWeight;
     }
 
-    public Collection<PackageEntry> getPackageEntries() {
+    public List<PackageEntry> getPackageEntries() {
         return packageEntries;
     }
 
@@ -36,5 +36,13 @@ public class Package implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(getMaxWeight(), getPackageEntries());
+    }
+
+    @Override
+    public String toString() {
+        return "Package{" +
+                "maxWeight=" + maxWeight +
+                ", packageEntries=" + packageEntries +
+                '}';
     }
 }
