@@ -4,95 +4,100 @@ import com.mobiquity.domain.Package;
 import com.mobiquity.domain.PackageBuilder;
 import com.mobiquity.domain.PackageEntry;
 import com.mobiquity.domain.PackageEntryBuilder;
-import com.mobiquity.exception.ApiException;
+import com.mobiquity.exception.APIException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static java.lang.Float.parseFloat;
 import static java.lang.Long.parseLong;
 
+// this class serves as a first pass on the raw data extracted from the file system to parse, do a basic functional rule check and parse the package data before sorting each relative package
 @Service
 public class PackageParser {
     private final static String EURO_CURRENCY_SIGN = "€";
 
-    public Package parsePackage(String rawPackage) throws ApiException {
+    // after extracting and transforming the data from the file system this function returns all the packages with all the possible entries given it respects the functional rules
+    public Package parsePackage(String rawPackage) throws APIException {
         try {
             String[] rawPackageData = rawPackage.split(":");
             checkDataSize(rawPackageData, 2);
             float maxWeight = Float.parseFloat(rawPackageData[0]);
 
-            weightExceedsMaxLimit(maxWeight);
+            weightOrCostExceedsMaxLimit(maxWeight);
 
             return PackageBuilder.builder().withMaxWeight(maxWeight)
-                    .withPackageEntries(mapPackageEntries(rawPackageData[1])).get();
+                    .withPackageEntries(mapPossiblePackageEntries(rawPackageData[1], maxWeight)).get();
 
         } catch (NumberFormatException numberFormatException) {
-            StringBuilder apiExceptionMessage = new StringBuilder(ApiException.CORRUPTED_PACKAGE_DATA_PARSE);
+            StringBuilder apiExceptionMessage = new StringBuilder(APIException.CORRUPTED_PACKAGE_DATA_PARSE);
             apiExceptionMessage.append("\n");
             apiExceptionMessage.append(rawPackage);
-            throw new ApiException(apiExceptionMessage.toString());
+            throw new APIException(apiExceptionMessage.toString());
         }
     }
 
-    public List<PackageEntry> mapPackageEntries(String rawPackageEntries) throws ApiException {
-        return mapPackageEntries( new ArrayList(Arrays.asList(rawPackageEntries.split("\\|"))),new ArrayList(),0f);
+    public List<PackageEntry> mapPossiblePackageEntries(String rawPackageEntries, float maxWeight) throws APIException {
+        return mapPossiblePackageEntries( new ArrayList(Arrays.asList(rawPackageEntries.split("\\|"))),new ArrayList());
     }
 
-    private List<PackageEntry> mapPackageEntries(List<String> rawPackageEntries, List<PackageEntry> packageEntries, float temporaryWeight) throws ApiException {
+    // for a given single package it checks basic functional rules and extracts the possible package entries to a given package.
+    private List<PackageEntry> mapPossiblePackageEntries(List<String> rawPackageEntries, List<PackageEntry> packageEntries) throws APIException {
         if (rawPackageEntries.isEmpty()) {
             if (packageEntries.isEmpty()) {
-                throw new ApiException(ApiException.CORRUPTED_PACKAGE_DATA);
+                throw new APIException(APIException.CORRUPTED_PACKAGE_DATA);
             }
             if(packageEntries.size() > 15) {
-                throw new ApiException(ApiException.CORRUPTED_PACKAGE_DATA_SURPASSED_MAX_CAPACITY);
+                throw new APIException(APIException.CORRUPTED_PACKAGE_DATA_SURPASSED_MAX_CAPACITY);
             }
             return packageEntries;
         }
         PackageEntry packageEntry = parsePackageEntry(rawPackageEntries.remove(0));
-        temporaryWeight += packageEntry.getWeight();
-
-        weightExceedsMaxLimit(temporaryWeight);
         packageEntries.add(packageEntry);
 
-        return mapPackageEntries(rawPackageEntries, packageEntries, temporaryWeight);
+        return mapPossiblePackageEntries(rawPackageEntries, packageEntries);
     }
 
-    private void weightExceedsMaxLimit(float compare) throws ApiException {
-        if (Float.compare(compare, 100f) > 0) {
-            throw new ApiException(ApiException.CORRUPTED_PACKAGE_DATA_SURPASSED_MAX_WEIGHT);
+    // checks if cost or weight exceed their limit of a 100.
+    private void weightOrCostExceedsMaxLimit(float weightOrCost) throws APIException {
+        if (Float.compare(weightOrCost, 100f) > 0) {
+            throw new APIException(APIException.CORRUPTED_PACKAGE_DATA_SURPASSED_MAX_WEIGHT);
         }
     }
 
-    public PackageEntry parsePackageEntry(String rawPackageEntry) throws ApiException {
+    // for a given package entry checks if it is well structured and parses it.
+    public PackageEntry parsePackageEntry(String rawPackageEntry) throws APIException {
         String[] rawPackageEntryData = rawPackageEntry.split(",");
 
         checkDataSize(rawPackageEntryData, 3);
         String rawCost = rawPackageEntryData[2];
         if (StringUtils.countOccurrencesOf(rawCost, EURO_CURRENCY_SIGN) != 1) {
-            throw new ApiException(ApiException.CORRUPTED_PACKAGE_DATA_PARSE);
+            throw new APIException(APIException.CORRUPTED_PACKAGE_DATA_PARSE);
         }
         try {
             float packageEntryWeight = parseFloat(rawPackageEntryData[1]);
-            weightExceedsMaxLimit(packageEntryWeight);
+            float packageEntryCost = parseFloat(rawCost.replace(EURO_CURRENCY_SIGN, ""));
+            weightOrCostExceedsMaxLimit(packageEntryWeight);
+            weightOrCostExceedsMaxLimit(packageEntryCost);
+
             return PackageEntryBuilder.builder().withIndexNumber(parseLong(rawPackageEntryData[0]))
                     .withWeight(packageEntryWeight)
-                    .withCost(parseFloat(rawCost.replace(EURO_CURRENCY_SIGN, ""))).get();
+                    .withCost(packageEntryCost).get();
         } catch (NumberFormatException numberFormatException) {
-            StringBuilder apiExceptionMessage = new StringBuilder(ApiException.CORRUPTED_PACKAGE_DATA_PARSE);
+            StringBuilder apiExceptionMessage = new StringBuilder(APIException.CORRUPTED_PACKAGE_DATA_PARSE);
             apiExceptionMessage.append("\n");
             apiExceptionMessage.append(rawPackageEntry);
-            throw new ApiException(apiExceptionMessage.toString());
+            throw new APIException(apiExceptionMessage.toString());
         }
     }
 
-    private void checkDataSize(String[] rawPackageData, int expectedSize) throws ApiException {
+    // be it a package or a package entry checks the size of information we expect to have, in case of size mismatch throws a APIException.
+    private void checkDataSize(String[] rawPackageData, int expectedSize) throws APIException {
         if (rawPackageData == null || rawPackageData.length != expectedSize) {
-            throw new ApiException(ApiException.CORRUPTED_PACKAGE_DATA);
+            throw new APIException(APIException.CORRUPTED_PACKAGE_DATA);
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.mobiquity.utilities;
 
-import com.mobiquity.exception.ApiException;
+import com.mobiquity.exception.APIException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -10,14 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
-// this utility class enables us to read files, adapt them to a more readable format and do a basic check for unstructured or corrupted files in that case ApiException will be thrown
+// this utility class enables us to read files, adapt them to a more readable format and do a basic check for unstructured or corrupted files in that case APIException will be thrown
 public class FileReaderUtils {
     private final static String COLON = ":";
     private final static String OPEN_PARENTHESIS = "(";
     private final static String CLOSE_PARENTHESIS = ")";
 
     // extracts the file data in a raw manner while eliminating spaces and empty lines
-    public static List<String> extractFileData(String filePath) throws ApiException {
+    public static List<String> extractFileData(String filePath) throws APIException {
         List<String> rawFileData = new ArrayList();
         try (FileReader fr = new FileReader(filePath, StandardCharsets.UTF_8);
              BufferedReader reader = new BufferedReader(fr)) {
@@ -29,7 +29,7 @@ public class FileReaderUtils {
                 }
             }
         } catch (IOException e) {
-            throw new ApiException(ApiException.FILE_PATH_NOT_FOUND);
+            throw new APIException(APIException.FILE_PATH_NOT_FOUND);
         }
 
         return rawFileData;
@@ -49,19 +49,19 @@ public class FileReaderUtils {
 
     // data lifecycle example:
     // 81 :(1,53.38,€45) (2,88.6 2, €98)  => 81:(1,53.38,€45||2,88.62,€98) => 81:1,53.38,€45|2,88.62,€98
-    public static List<String> transformFileData(List<String> rawFileData) throws ApiException {
+    public static List<String> transformFileData(List<String> rawFileData) throws APIException {
         try {
             return transformFileData(rawFileData, new ArrayList<>(), new StringBuilder(), false);
         } catch (PatternSyntaxException exception) {
-            throw new ApiException(ApiException.CORRUPTED_PACKAGE_DATA);
+            throw new APIException(APIException.CORRUPTED_PACKAGE_DATA);
         }
     }
 
     // the recursive function that enables us to recover and order the data, one entry a line
-    public static List<String> transformFileData(List<String> rawFileData, List<String> refinedData, StringBuilder temporaryData, boolean hasAtLeastOneValidEntry) throws ApiException {
+    private static List<String> transformFileData(List<String> rawFileData, List<String> refinedData, StringBuilder temporaryData, boolean hasAtLeastOneValidEntry) throws APIException {
         if (rawFileData.isEmpty()) {
             if (refinedData.isEmpty()) {
-                throw new ApiException(ApiException.CORRUPTED_PACKAGE_DATA);
+                throw new APIException(APIException.CORRUPTED_PACKAGE_DATA);
             }
             refinedData.add(removeLineBreaksAndFormat(temporaryData.toString().replaceAll("\\)", "")));
             return refinedData;
@@ -85,7 +85,7 @@ public class FileReaderUtils {
             }
             refinedData.add(removeLineBreaksAndFormat(temporaryData.toString().replaceAll("\\)", "")));
             temporaryData = new StringBuilder(rawLine);
-            //temporaryData.append(CLOSE_PARENTHESIS);
+
             rawFileData.remove(0);
             return transformFileData(rawFileData, refinedData, temporaryData, true);
         }
@@ -98,17 +98,17 @@ public class FileReaderUtils {
     private static String removeLineBreaksAndFormat(String refinedLineEntry) {
         return refinedLineEntry.replaceAll("\n", "")
                 .replaceAll("\r", "")
-                .replaceAll("\\)\\(", "|")
-                .replaceAll("\\(", "");
+                .replaceAll("\\(", "|")
+                .replaceFirst("\\|", "");
     }
 
     private static boolean doesNotContainColon(String lineEntry) {
         return !lineEntry.contains(COLON);
     }
 
-    public static String checkDataStructure(String refinedData) throws ApiException {
+    public static String checkDataStructure(String refinedData) throws APIException {
         if (refinedData.contains(OPEN_PARENTHESIS) || refinedData.contains(CLOSE_PARENTHESIS)) {
-            throw new ApiException(ApiException.CORRUPTED_PACKAGE_DATA);
+            throw new APIException(APIException.CORRUPTED_PACKAGE_DATA);
         }
         return refinedData;
     }

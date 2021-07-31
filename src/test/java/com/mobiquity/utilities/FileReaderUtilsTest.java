@@ -1,6 +1,6 @@
 package com.mobiquity.utilities;
 
-import com.mobiquity.exception.ApiException;
+import com.mobiquity.exception.APIException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,14 +34,14 @@ class FileReaderUtilsTest {
     @Test
     void fileReaderTestExtractFileDataReturnsApiExceptionWhenRandomFalseFilePath() throws IOException {
         // test
-        Exception exception = assertThrows(ApiException.class, () -> {
+        Exception exception = assertThrows(APIException.class, () -> {
             FileReaderUtils.extractFileData("randomFalseFilePath");
         });
 
         // assert
         assertThat(exception).isNotNull();
-        assertThat(exception.getClass()).isEqualTo(ApiException.class);
-        assertThat(exception.getMessage()).isEqualTo(ApiException.FILE_PATH_NOT_FOUND);
+        assertThat(exception.getClass()).isEqualTo(APIException.class);
+        assertThat(exception.getMessage()).isEqualTo(APIException.FILE_PATH_NOT_FOUND);
     }
 
 
@@ -51,14 +51,15 @@ class FileReaderUtilsTest {
         File resource = new ClassPathResource("testData.txt").getFile();
 
         // test
-        List<String> transfromedResult = FileReaderUtils.transformFileData(FileReaderUtils.extractFileData(resource.getPath()));
+        List<String> transformedResult = FileReaderUtils.transformFileData(FileReaderUtils.extractFileData(resource.getPath()));
 
         // assert
-        assertThat(transfromedResult).isNotEmpty();
-        assertThat(transfromedResult.size()).isEqualTo(4);
-        transfromedResult.stream().forEach(line -> {
+        assertThat(transformedResult).isNotEmpty();
+        assertThat(transformedResult.size()).isEqualTo(4);
+        transformedResult.stream().forEach(line -> {
             assertThat(line.split(":").length).isEqualTo(2);
         });
+        assertThat(transformedResult.get(0)).isEqualTo("81:1,53.38,€45|2,88.62,€98|3,78.48,€3|4,72.30,€76|5,30.18,€96,46.34,€48");
     }
 
     @Test
@@ -68,14 +69,14 @@ class FileReaderUtilsTest {
         File resource = new ClassPathResource("testDataThatIsCorrupted.txt").getFile();
 
         // test
-        Exception exception = assertThrows(ApiException.class, () -> {
+        Exception exception = assertThrows(APIException.class, () -> {
             FileReaderUtils.transformFileData(FileReaderUtils.extractFileData(resource.getPath()));
         });
 
         // assert
         assertThat(exception).isNotNull();
-        assertThat(exception.getClass()).isEqualTo(ApiException.class);
-        assertThat(exception.getMessage()).isEqualTo(ApiException.CORRUPTED_PACKAGE_DATA);
+        assertThat(exception.getClass()).isEqualTo(APIException.class);
+        assertThat(exception.getMessage()).isEqualTo(APIException.CORRUPTED_PACKAGE_DATA);
     }
 
 
@@ -86,23 +87,23 @@ class FileReaderUtilsTest {
         String packageData2 = "52:1,1.5,)12|";
 
         // test
-        Exception exception = assertThrows(ApiException.class, () -> {
+        Exception exception = assertThrows(APIException.class, () -> {
             FileReaderUtils.checkDataStructure(packageData1);
         });
 
         // assert
         assertThat(exception).isNotNull();
-        assertThat(exception.getClass()).isEqualTo(ApiException.class);
-        assertThat(exception.getMessage()).isEqualTo(ApiException.CORRUPTED_PACKAGE_DATA);
+        assertThat(exception.getClass()).isEqualTo(APIException.class);
+        assertThat(exception.getMessage()).isEqualTo(APIException.CORRUPTED_PACKAGE_DATA);
 
         // test
-        Exception exception2 = assertThrows(ApiException.class, () -> {
+        Exception exception2 = assertThrows(APIException.class, () -> {
             FileReaderUtils.checkDataStructure(packageData2);
         });
 
         // assert
         assertThat(exception).isNotNull();
-        assertThat(exception.getClass()).isEqualTo(ApiException.class);
-        assertThat(exception.getMessage()).isEqualTo(ApiException.CORRUPTED_PACKAGE_DATA);
+        assertThat(exception.getClass()).isEqualTo(APIException.class);
+        assertThat(exception.getMessage()).isEqualTo(APIException.CORRUPTED_PACKAGE_DATA);
     }
 }
