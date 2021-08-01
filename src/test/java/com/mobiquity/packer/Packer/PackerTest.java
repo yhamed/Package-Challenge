@@ -15,7 +15,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-class PackerApplicationTests {
+class PackerTest {
 
     @Test
     void packVerifyFinalOutputResultTest() throws IOException {
