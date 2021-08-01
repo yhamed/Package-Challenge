@@ -3,7 +3,7 @@ package com.mobiquity.domain;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class PackageEntry implements Serializable, Comparable<PackageEntry>{
+public class PackageEntry implements Serializable, Comparable<PackageEntry> {
 
     private static final long serialVersionUID = -1154114435785633780L;
 
@@ -30,6 +30,9 @@ public class PackageEntry implements Serializable, Comparable<PackageEntry>{
     }
 
     private float getCostByWeightRatio() {
+        if (Float.compare(getWeight(), 0f) == 0) {
+            return Float.MAX_VALUE;
+        }
         return getCost() / getWeight();
     }
 
@@ -49,7 +52,7 @@ public class PackageEntry implements Serializable, Comparable<PackageEntry>{
     @Override
     public int compareTo(PackageEntry packageEntry) {
         int compareResult = Float.compare(this.getCostByWeightRatio(), packageEntry.getCostByWeightRatio());
-        return compareResult == 0 ? Float.compare(this.cost, packageEntry.getCost()): compareResult;
+        return compareResult == 0 ? Float.compare(this.cost, packageEntry.getCost()) : compareResult;
     }
 
     @Override

@@ -4,12 +4,13 @@ import com.mobiquity.domain.Package;
 
 
 import java.util.List;
+
 import com.mobiquity.domain.PackageEntry;
 import com.mobiquity.exception.APIException;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,16 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class PackageParserTest {
 
-    @InjectMocks
-    private PackageParser packageParser;
-
     @Test
     void testParsePackage() throws APIException {
         // setup
         String rawPackageData = "81:1,33.38,€45|2,58.62,€98";
 
         // test
-        Package packageResult = packageParser.parsePackage(rawPackageData);
+        Package packageResult = PackageParser.parsePackage(rawPackageData);
 
         // assert
         assertThat(packageResult).isNotNull();
@@ -38,13 +36,13 @@ class PackageParserTest {
         // setup
         String corruptedPackageDataSample1 = "811,53.38,€45|2,88.62,€98";
         String corruptedPackageDataSample2 = "81:1,53.38,€45|2,88.62,€:98";
-        // test
 
+        // test
         Exception exception1 = assertThrows(APIException.class, () -> {
-            packageParser.parsePackage(corruptedPackageDataSample1);
+            PackageParser.parsePackage(corruptedPackageDataSample1);
         });
         Exception exception2 = assertThrows(APIException.class, () -> {
-            packageParser.parsePackage(corruptedPackageDataSample2);
+            PackageParser.parsePackage(corruptedPackageDataSample2);
         });
 
         // assert
@@ -60,7 +58,7 @@ class PackageParserTest {
         String rawPackageData = "2,88.62,€98";
 
         // test
-        PackageEntry packageResult = packageParser.parsePackageEntry(rawPackageData);
+        PackageEntry packageResult = PackageParser.parsePackageEntry(rawPackageData);
 
         // assert
         assertThat(packageResult).isNotNull();
@@ -80,19 +78,19 @@ class PackageParserTest {
 
         // test & assert
         assertThrows(APIException.class, () -> {
-            packageParser.parsePackageEntry(corruptedPackageEntrySample1);
+            PackageParser.parsePackageEntry(corruptedPackageEntrySample1);
         });
         assertThrows(APIException.class, () -> {
-            packageParser.parsePackageEntry(corruptedPackageEntrySample2);
+            PackageParser.parsePackageEntry(corruptedPackageEntrySample2);
         });
         assertThrows(APIException.class, () -> {
-            packageParser.parsePackageEntry(corruptedPackageEntrySample3);
+            PackageParser.parsePackageEntry(corruptedPackageEntrySample3);
         });
         assertThrows(APIException.class, () -> {
-            packageParser.parsePackageEntry(corruptedPackageEntrySample4);
+            PackageParser.parsePackageEntry(corruptedPackageEntrySample4);
         });
         assertThrows(APIException.class, () -> {
-            packageParser.parsePackageEntry(corruptedPackageEntrySample5);
+            PackageParser.parsePackageEntry(corruptedPackageEntrySample5);
         });
     }
 
@@ -102,7 +100,7 @@ class PackageParserTest {
         String packageEntry = "1,3.38,€45|2,8.62,€98";
 
         // test
-        List<PackageEntry> packageEntriesResult = (List<PackageEntry>) packageParser.mapPossiblePackageEntries(packageEntry, 50f);
+        List<PackageEntry> packageEntriesResult = PackageParser.mapPossiblePackageEntries(packageEntry);
 
         // assert
         assertThat(packageEntriesResult).isNotEmpty();
@@ -123,10 +121,10 @@ class PackageParserTest {
 
         // test
         assertThrows(APIException.class, () -> {
-            packageParser.mapPossiblePackageEntries(corruptedPackageEntrySample1_singlePackageExceedsMaxWeight, 100f);
+            PackageParser.mapPossiblePackageEntries(corruptedPackageEntrySample1_singlePackageExceedsMaxWeight);
         });
-        Exception exception1 =assertThrows(APIException.class, () -> {
-            packageParser.mapPossiblePackageEntries(corruptedPackageEntrySample2_packagesExceedsMaximumCapacity, 100f);
+        Exception exception1 = assertThrows(APIException.class, () -> {
+            PackageParser.mapPossiblePackageEntries(corruptedPackageEntrySample2_packagesExceedsMaximumCapacity);
         });
 
         // assert

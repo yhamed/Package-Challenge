@@ -35,7 +35,7 @@ class FileReaderUtilsTest {
     void fileReaderTestExtractFileDataReturnsApiExceptionWhenRandomFalseFilePath() throws IOException {
         // test
         Exception exception = assertThrows(APIException.class, () -> {
-            FileReaderUtils.extractFileData("randomFalseFilePath");
+            FileReaderUtils.extractFileData("randomInexistantFilePath");
         });
 
         // assert
@@ -48,7 +48,7 @@ class FileReaderUtilsTest {
     @Test
     void fileReaderTestTransformFileDataToParseReadyStructure() throws IOException {
         // setup
-        File resource = new ClassPathResource("testData.txt").getFile();
+        File resource = new ClassPathResource("testDataWithRandomLineBreaks.txt").getFile();
 
         // test
         List<String> transformedResult = FileReaderUtils.transformFileData(FileReaderUtils.extractFileData(resource.getPath()));
@@ -59,7 +59,7 @@ class FileReaderUtilsTest {
         transformedResult.stream().forEach(line -> {
             assertThat(line.split(":").length).isEqualTo(2);
         });
-        assertThat(transformedResult.get(0)).isEqualTo("81:1,53.38,€45|2,88.62,€98|3,78.48,€3|4,72.30,€76|5,30.18,€96,46.34,€48");
+        assertThat(transformedResult.get(0)).isEqualTo("81:1,53.38,€45|2,88.62,€98|3,78.48,€3|4,72.30,€76|5,30.18,€9|6,46.34,€48");
     }
 
     @Test

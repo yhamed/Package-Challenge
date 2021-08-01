@@ -60,46 +60,55 @@ public class FileReaderUtils {
     // the recursive function that enables us to recover and order the data, one entry a line
     private static List<String> transformFileData(List<String> rawFileData, List<String> refinedData, StringBuilder temporaryData, boolean hasAtLeastOneValidEntry) throws APIException {
         if (rawFileData.isEmpty()) {
-            if (refinedData.isEmpty()) {
+            String refinedDataEntry = temporaryData.toString();
+            if (refinedDataEntry.isEmpty() && refinedData.isEmpty()) {
                 throw new APIException(APIException.CORRUPTED_PACKAGE_DATA);
             }
-            refinedData.add(removeLineBreaksAndFormat(temporaryData.toString().replaceAll("\\)", "")));
+            refinedDataEntry = removeLineBreaksAndFormat(refinedDataEntry);
+            refinedData.add(placePipeSeparatorsAndAdaptStructure(refinedDataEntry));
             return refinedData;
         }
-        String rawLine = rawFileData.get(0);
+        String rawLine = rawFileData.remove(0);
         if (doesNotContainColon(rawLine)) {
-            temporaryData.append(removeLineBreaksAndFormat(rawLine));
+            temporaryData.append(rawLine);
 
-            rawFileData.remove(0);
             return transformFileData(rawFileData, refinedData, temporaryData, hasAtLeastOneValidEntry);
         }
         if (hasAtLeastOneValidEntry) {
             String validRefinedDataForRelativeEntry = removeLineBreaksAndFormat(temporaryData.toString());
             if (validRefinedDataForRelativeEntry.lastIndexOf(CLOSE_PARENTHESIS) != validRefinedDataForRelativeEntry.length() - 1) {
-                refinedData.add(validRefinedDataForRelativeEntry.split(CLOSE_PARENTHESIS)[0]);
+                String[] validRefinedDataForRelativeEntries = validRefinedDataForRelativeEntry.split(CLOSE_PARENTHESIS);
+                if (validRefinedDataForRelativeEntries.length != 0) {
+                    refinedData.add(placePipeSeparatorsAndAdaptStructure(validRefinedDataForRelativeEntries[validRefinedDataForRelativeEntries.length - 2]));
+                } else {
+                    refinedData.add(validRefinedDataForRelativeEntry.replace(OPEN_PARENTHESIS, "").replace(CLOSE_PARENTHESIS, ""));
+                }
                 temporaryData = new StringBuilder(validRefinedDataForRelativeEntry.split(CLOSE_PARENTHESIS)[1]);
                 temporaryData.append(rawLine);
 
-                rawFileData.remove(0);
                 return transformFileData(rawFileData, refinedData, temporaryData, true);
             }
-            refinedData.add(removeLineBreaksAndFormat(temporaryData.toString().replaceAll("\\)", "")));
+            refinedData.add(placePipeSeparatorsAndAdaptStructure(temporaryData.toString()));
             temporaryData = new StringBuilder(rawLine);
 
-            rawFileData.remove(0);
             return transformFileData(rawFileData, refinedData, temporaryData, true);
         }
         temporaryData.append(rawLine);
-        rawFileData.remove(0);
         return transformFileData(rawFileData, refinedData, temporaryData, true);
     }
 
-    // removes line breaks, removes open parenthesis and transforms `)(` -> `|`
+    // removes all open and closed parenthesis and places a pipe in between package entries (transforms `)(` into `|`)
+    private static String placePipeSeparatorsAndAdaptStructure(String refinedDataEntry) {
+        return refinedDataEntry.replace(OPEN_PARENTHESIS, "|")
+                .replaceFirst("\\|", "")
+                .replace(CLOSE_PARENTHESIS, "");
+    }
+
+    // removes line breaks and spaces
     private static String removeLineBreaksAndFormat(String refinedLineEntry) {
-        return refinedLineEntry.replaceAll("\n", "")
-                .replaceAll("\r", "")
-                .replaceAll("\\(", "|")
-                .replaceFirst("\\|", "");
+        return refinedLineEntry.replace("\n", "")
+                .replace("\r", "")
+                .replaceAll("\\s+", "");
     }
 
     private static boolean doesNotContainColon(String lineEntry) {

@@ -10,14 +10,8 @@ public class APIException extends FileNotFoundException {
     public static final String CORRUPTED_PACKAGE_DATA_SURPASSED_MAX_WEIGHT = "The file data structure is corrupted, the package has exceeded the maximum weight limit of a 100.";
     public static final String CORRUPTED_PACKAGE_DATA_SURPASSED_MAX_CAPACITY = "The file data structure is corrupted, the package has exceeded the maximum capacity (15 entries at most).";
 
-    public APIException(String reason) {
-        super(reason);
+    public APIException(String message) {
+        super(message);
     }
 
-    public static APIException getCorruptedFileException() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(APIException.CORRUPTED_PACKAGE_DATA);
-
-        return new APIException(stringBuilder.toString());
-    }
 }

@@ -5,7 +5,6 @@ import com.mobiquity.domain.PackageBuilder;
 import com.mobiquity.domain.PackageEntry;
 import com.mobiquity.domain.PackageEntryBuilder;
 import com.mobiquity.exception.APIException;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -16,12 +15,11 @@ import static java.lang.Float.parseFloat;
 import static java.lang.Long.parseLong;
 
 // this class serves as a first pass on the raw data extracted from the file system to parse, do a basic functional rule check and parse the package data before sorting each relative package
-@Service
 public class PackageParser {
     private final static String EURO_CURRENCY_SIGN = "€";
 
     // after extracting and transforming the data from the file system this function returns all the packages with all the possible entries given it respects the functional rules
-    public Package parsePackage(String rawPackage) throws APIException {
+    public static Package parsePackage(String rawPackage) throws APIException {
         try {
             String[] rawPackageData = rawPackage.split(":");
             checkDataSize(rawPackageData, 2);
@@ -30,7 +28,7 @@ public class PackageParser {
             weightOrCostExceedsMaxLimit(maxWeight);
 
             return PackageBuilder.builder().withMaxWeight(maxWeight)
-                    .withPackageEntries(mapPossiblePackageEntries(rawPackageData[1], maxWeight)).get();
+                    .withPackageEntries(mapPossiblePackageEntries(rawPackageData[1])).get();
 
         } catch (NumberFormatException numberFormatException) {
             StringBuilder apiExceptionMessage = new StringBuilder(APIException.CORRUPTED_PACKAGE_DATA_PARSE);
@@ -40,12 +38,13 @@ public class PackageParser {
         }
     }
 
-    public List<PackageEntry> mapPossiblePackageEntries(String rawPackageEntries, float maxWeight) throws APIException {
-        return mapPossiblePackageEntries( new ArrayList(Arrays.asList(rawPackageEntries.split("\\|"))),new ArrayList());
+    public static List<PackageEntry> mapPossiblePackageEntries(String rawPackageEntries) throws APIException {
+
+        return mapPossiblePackageEntries(new ArrayList(Arrays.asList(rawPackageEntries.split("\\|"))),new ArrayList());
     }
 
     // for a given single package it checks basic functional rules and extracts the possible package entries to a given package.
-    private List<PackageEntry> mapPossiblePackageEntries(List<String> rawPackageEntries, List<PackageEntry> packageEntries) throws APIException {
+    private static List<PackageEntry> mapPossiblePackageEntries(List<String> rawPackageEntries, List<PackageEntry> packageEntries) throws APIException {
         if (rawPackageEntries.isEmpty()) {
             if (packageEntries.isEmpty()) {
                 throw new APIException(APIException.CORRUPTED_PACKAGE_DATA);
@@ -62,14 +61,14 @@ public class PackageParser {
     }
 
     // checks if cost or weight exceed their limit of a 100.
-    private void weightOrCostExceedsMaxLimit(float weightOrCost) throws APIException {
+    private static void weightOrCostExceedsMaxLimit(float weightOrCost) throws APIException {
         if (Float.compare(weightOrCost, 100f) > 0) {
             throw new APIException(APIException.CORRUPTED_PACKAGE_DATA_SURPASSED_MAX_WEIGHT);
         }
     }
 
     // for a given package entry checks if it is well structured and parses it.
-    public PackageEntry parsePackageEntry(String rawPackageEntry) throws APIException {
+    public static PackageEntry parsePackageEntry(String rawPackageEntry) throws APIException {
         String[] rawPackageEntryData = rawPackageEntry.split(",");
 
         checkDataSize(rawPackageEntryData, 3);
@@ -95,7 +94,7 @@ public class PackageParser {
     }
 
     // be it a package or a package entry checks the size of information we expect to have, in case of size mismatch throws a APIException.
-    private void checkDataSize(String[] rawPackageData, int expectedSize) throws APIException {
+    private static void checkDataSize(String[] rawPackageData, int expectedSize) throws APIException {
         if (rawPackageData == null || rawPackageData.length != expectedSize) {
             throw new APIException(APIException.CORRUPTED_PACKAGE_DATA);
         }
