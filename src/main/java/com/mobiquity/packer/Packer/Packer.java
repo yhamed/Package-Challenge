@@ -28,6 +28,6 @@ public class Packer {
             packagingResult.append("-");
         });
 
-        return packagingResult.toString().substring(0, packagingResult.length() - 1);
+        return packagingResult.toString().substring(1, packagingResult.length() - 1);
     }
 }

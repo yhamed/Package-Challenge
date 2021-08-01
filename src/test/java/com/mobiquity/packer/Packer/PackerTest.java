@@ -30,7 +30,7 @@ class PackerTest {
         System.out.println(packingResult);
 
         // assert
-        assertThat(packingResult).isEqualTo("\n4\n-\n-\n2,3\n4\n-\n9,8\n");
+        assertThat(packingResult).isEqualTo("4\n-\n-\n2,3\n4\n-\n9,8\n");
     }
 
     @Test
