@@ -4,13 +4,15 @@ import com.mobiquity.exception.APIException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.micronaut.core.io.ResourceResolver;
+import io.micronaut.core.io.scan.ClassPathResourceLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.ClassPathResource;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -20,10 +22,11 @@ class PackerTest {
     @Test
     void packVerifyFinalOutputResultTest() throws IOException {
         // setup
-        File resource = new ClassPathResource("testDataWithRandomLineBreaks.txt").getFile();
+        ClassPathResourceLoader loader = new ResourceResolver().getLoader(ClassPathResourceLoader.class).get();
+        Optional<URL> resource = loader.getResource("classpath:testDataWithRandomLineBreaks.txt");
 
         // test
-        String packingResult = Packer.pack(resource.getPath());
+        String packingResult = Packer.pack(resource.get().getPath());
         System.out.println(packingResult);
 
         // assert
@@ -33,11 +36,12 @@ class PackerTest {
     @Test
     void packVerifyExceptionPropagation() throws IOException {
         // setup
-        File resource = new ClassPathResource("testDataThatIsCorrupted.txt").getFile();
+        ClassPathResourceLoader loader = new ResourceResolver().getLoader(ClassPathResourceLoader.class).get();
+        Optional<URL> resource = loader.getResource("classpath:testDataThatIsCorrupted.txt");
 
         // test
         Exception exception = assertThrows(APIException.class, () -> {
-            Packer.pack(resource.getPath());
+            Packer.pack(resource.get().getPath());
         });
 
         // assert

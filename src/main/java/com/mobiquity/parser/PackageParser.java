@@ -5,7 +5,7 @@ import com.mobiquity.domain.PackageBuilder;
 import com.mobiquity.domain.PackageEntry;
 import com.mobiquity.domain.PackageEntryBuilder;
 import com.mobiquity.exception.APIException;
-import org.springframework.util.StringUtils;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ public class PackageParser {
 
     public static List<PackageEntry> mapPossiblePackageEntries(String rawPackageEntries) throws APIException {
 
-        return mapPossiblePackageEntries(new ArrayList(Arrays.asList(rawPackageEntries.split("\\|"))),new ArrayList());
+        return mapPossiblePackageEntries(new ArrayList(Arrays.asList(rawPackageEntries.split("\\|"))), new ArrayList());
     }
 
     // for a given single package it checks basic functional rules and extracts the possible package entries to a given package.
@@ -49,7 +49,7 @@ public class PackageParser {
             if (packageEntries.isEmpty()) {
                 throw new APIException(APIException.CORRUPTED_PACKAGE_DATA);
             }
-            if(packageEntries.size() > 15) {
+            if (packageEntries.size() > 15) {
                 throw new APIException(APIException.CORRUPTED_PACKAGE_DATA_SURPASSED_MAX_CAPACITY);
             }
             return packageEntries;
@@ -73,7 +73,7 @@ public class PackageParser {
 
         checkDataSize(rawPackageEntryData, 3);
         String rawCost = rawPackageEntryData[2];
-        if (StringUtils.countOccurrencesOf(rawCost, EURO_CURRENCY_SIGN) != 1) {
+        if (StringUtils.countMatches(rawCost, EURO_CURRENCY_SIGN) != 1) {
             throw new APIException(APIException.CORRUPTED_PACKAGE_DATA_PARSE);
         }
         try {

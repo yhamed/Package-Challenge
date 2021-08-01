@@ -131,5 +131,4 @@ class PackageParserTest {
         assertThat(exception1.getClass()).isEqualTo(APIException.class);
         assertThat(exception1.getMessage()).isEqualTo(APIException.CORRUPTED_PACKAGE_DATA_SURPASSED_MAX_CAPACITY);
     }
-
 }

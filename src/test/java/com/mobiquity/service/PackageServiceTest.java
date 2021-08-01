@@ -4,16 +4,18 @@ import com.mobiquity.domain.Package;
 import com.mobiquity.domain.PackageBuilder;
 import com.mobiquity.domain.PackageEntry;
 import com.mobiquity.domain.PackageEntryBuilder;
+import io.micronaut.core.io.ResourceResolver;
+import io.micronaut.core.io.scan.ClassPathResourceLoader;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.ClassPathResource;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class PackageServiceTest {
@@ -21,10 +23,11 @@ class PackageServiceTest {
     @Test
     void loadPackages() throws IOException {
         // setup
-        File resource = new ClassPathResource("testDataWithRandomLineBreaks.txt").getFile();
+        ClassPathResourceLoader loader = new ResourceResolver().getLoader(ClassPathResourceLoader.class).get();
+        Optional<URL> resource = loader.getResource("classpath:testDataWithRandomLineBreaks.txt");
 
         // test
-        List<Package> packageListResult = PackageService.loadPackages(resource.getPath());
+        List<Package> packageListResult = PackageService.loadPackages(resource.get().getPath());
 
         // assert
         Assertions.assertThat(packageListResult).isNotEmpty();
